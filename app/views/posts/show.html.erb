@@ -8,7 +8,7 @@
   </h1>
 </div>
 
-<div class="row">
+<%= content_tag :div, class: 'row', id: "#{post.id}" %>
   <div class="col-md-8">
     <p><%= @post.body %></p>
     <div>
@@ -39,4 +39,4 @@
       <%= render partial: 'favorites/favorite', locals: {post:@post} %>
     <% end %>
   </div>
-</div>
+<% end %>
