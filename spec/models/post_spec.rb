@@ -10,7 +10,7 @@ RSpec.describe Post, type: :model do
   let(:post) {topic.posts.create!(title: title, body: body, user: user)}
 
   it { is_expected.to have_many(:comments) }
-  it {is_expected.to have_many(:votes) }
+  it { is_expected.to have_many(:votes) }
 
   it { is_expected.to belong_to(:topic) }
   it { is_expected.to belong_to(:user) }
@@ -73,6 +73,13 @@ RSpec.describe Post, type: :model do
         old_rank = post.rank
         post.votes.create!(value: -1)
         expect(post.rank).to eq (old_rank - 1)
+      end
+    end
+
+    describe "#create_vote" do
+      it "sets initial vote to 1" do
+        new_post = topic.posts.create!(title: title, body: body, user: user)
+        expect(new_post.points).to eq 1
       end
     end
   end

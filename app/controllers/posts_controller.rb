@@ -1,10 +1,11 @@
 class PostsController < ApplicationController
 
   before_action :require_sign_in, except: :show
-  before_action :authorize_user, except: [:show, :new, :create]
+  before_action :find_post, except: [:index, :new, :create]
+  before_action :can_update, only: [:edit, :update, :new, :create]
+  before_action :can_delete, only: [:destroy]
 
   def show
-    @post = Post.find(params[:id])
   end
 
   def new
@@ -27,11 +28,9 @@ class PostsController < ApplicationController
   end
 
   def edit
-    @post = Post.find(params[:id])
   end
 
   def update
-    @post = Post.find(params[:id])
     @post.assign_attributes(post_params)
 
     if @post.save
@@ -44,8 +43,6 @@ class PostsController < ApplicationController
   end
 
   def destroy
-    @post = Post.find(params[:id])
-
     if @post.destroy
       flash[:notice] = "\"#{@post.title}\" was deleted successfully."
       redirect_to @post.topic
@@ -60,11 +57,21 @@ class PostsController < ApplicationController
     params.require(:post).permit(:title, :body)
   end
 
-  def authorize_user
-    post = Post.find(params[:id])
-    unless current_user == post.user || current_user.admin?
-      flash[:alert] = "You must be an admin to do that."
-      redirect_to [post.topic, post]
+  def can_update
+    unless current_user.admin? || current_user.moderator? || current_user == @post.user
+      flash[:alert] = "You must be an admin or moderator to do that."
+      redirect_to topics_path
     end
+  end
+
+  def can_delete
+    unless current_user.admin? || current_user == @post.user
+      flash[:alert] = "You must be an admin to do that."
+      redirect_to topics_path
+    end
+  end
+
+  def find_post
+    @post = Post.find(params[:id])
   end
 end
